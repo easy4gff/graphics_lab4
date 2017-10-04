@@ -1,0 +1,9 @@
+D:\Programming\Computer Graphics\graphics_lab4\obj\Debug\graphics_lab4.csprojResolveAssemblyReference.cache
+D:\Programming\Computer Graphics\graphics_lab4\obj\Debug\lab4.Form1.resources
+D:\Programming\Computer Graphics\graphics_lab4\obj\Debug\lab4.Properties.Resources.resources
+D:\Programming\Computer Graphics\graphics_lab4\obj\Debug\graphics_lab4.csproj.GenerateResource.Cache
+D:\Programming\Computer Graphics\graphics_lab4\bin\Debug\lab4.exe.config
+D:\Programming\Computer Graphics\graphics_lab4\bin\Debug\lab4.exe
+D:\Programming\Computer Graphics\graphics_lab4\bin\Debug\lab4.pdb
+D:\Programming\Computer Graphics\graphics_lab4\obj\Debug\lab4.exe
+D:\Programming\Computer Graphics\graphics_lab4\obj\Debug\lab4.pdb
