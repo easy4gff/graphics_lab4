@@ -16,6 +16,68 @@ namespace lab4
         Graphics g;
         Bitmap   mainBitmap;
         Pen bluePen;
+        List<Shape> shapes;
+
+        class ShapeBuilder
+        {
+            static private Shape data;
+
+            static public bool isInProcess;
+            static public bool isComplete;
+
+            static public void StartBuilding(int index)
+            {
+                Clear();
+                switch (index) {
+                    case 0:
+                        data = new ShapePoint();
+                        break;
+                    case 1:
+                        data = new Segment();
+                        break;
+                    default:
+                        data = new Polygon();
+                        break;
+                }
+                isInProcess = true;
+            }
+
+            static public bool AddPoint(Point p)
+            {
+                if (isComplete && !(data is Polygon)) return true;
+
+                if (!isInProcess)
+                    throw new DataException("Shape is not currently in building process!");
+
+                data.location.cords.Add(p);
+                int count = data.location.cords.Count;
+                if (data is ShapePoint && count == 1 ||
+                    data is Segment    && count == 2 ||
+                    data is Polygon    && count >= 3)
+                {
+                    isComplete = true;
+                    return true;
+                }
+                return false;
+            }
+
+            static public Shape GetShape()
+            {
+                if (!isComplete)
+                    throw new DataException("Shape is not completed!");
+                data.GetType();
+                dynamic result = Convert.ChangeType(data, data.GetType());
+                Clear();
+                return result;
+            }
+
+            static private void Clear()
+            {
+                data = null;
+                isInProcess = false;
+                isComplete = false;
+            }
+        }
 
         // Координаты
         public class ShapeLocation
@@ -95,6 +157,11 @@ namespace lab4
                 location = new ShapeLocation(loc);
             }
 
+            public Shape(Shape sh)
+            {
+                location = new ShapeLocation(sh.location);
+            }
+
             public override string ToString()
             {
                 return location.ToString();
@@ -106,6 +173,8 @@ namespace lab4
 
         // Точка
         class ShapePoint : Shape {
+            public ShapePoint() {}
+
             public ShapePoint(Point p) : base(p) { }
 
             public override void draw(Graphics g, Pen pen)
@@ -117,6 +186,8 @@ namespace lab4
         // Отрезок
         class Segment : Shape
         {
+            public Segment() { }
+
             public Segment(Point p1, Point p2) : base(p1, p2) { }
 
             public override void draw(Graphics g, Pen pen)
@@ -134,6 +205,8 @@ namespace lab4
         // Многоугольник
         class Polygon : Shape
         {
+            public Polygon() { }
+
             public Polygon(List<Point> points) : base(points) { }
 
             public override void draw(Graphics g, Pen pen)
@@ -156,22 +229,44 @@ namespace lab4
             }
         }
 
+        public void drawShapes()
+        {
+            foreach (Shape s in shapes)
+                s.draw(g, bluePen);
+            pictureBox1.Invalidate();
+        }
+
+        public void initComboBox() {
+            comboBox1.Items.AddRange(new string[] {
+                "Точка",
+                "Отрезок",
+                "Многоугольник"
+            });
+
+            comboBox1.SelectedIndex = 0;
+        }
+
         public Form1()
         {
             InitializeComponent();
 
             mainBitmap = new Bitmap(pictureBox1.Width, pictureBox1.Height);
             g = Graphics.FromImage(mainBitmap);
+            g.Clear(Color.White);
             pictureBox1.Image = mainBitmap;
 
+            initComboBox();
+            shapes = new List<Shape>();
+
             bluePen = new Pen(Color.Blue);
+            
 
             Point p1 = new Point(0, 0);
             ShapePoint sp = new ShapePoint(p1);
-            sp.draw(g, bluePen);
+            //sp.draw(g, bluePen);
 
             Segment seg = new Segment(new Point(100, 100), new Point(250, 250));
-            seg.draw(g, bluePen);
+            //seg.draw(g, bluePen);
 
             Point p11 = new Point(0, 0);
             Point p2 = new Point(280, 120);
@@ -182,8 +277,59 @@ namespace lab4
             List<Point> points = new List<Point>();
             points.AddRange(new Point[] { p11, p2, p3, p4, p5, p6 });
             Polygon poly = new Polygon(points);
-            poly.draw(g, bluePen);
-            
+            //poly.draw(g, bluePen);
+
+            shapes.Add(sp);
+            shapes.Add(seg);
+            shapes.Add(poly);
+            drawShapes();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if (comboBox1.SelectedIndex == 2)
+            {
+                button2.Visible = true;
+            }
+            ShapeBuilder.StartBuilding(comboBox1.SelectedIndex);
+            comboBox1.Enabled = false;
+            button1.Enabled = false;
+        }
+
+        private void pictureBox1_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (!ShapeBuilder.isInProcess) return;
+
+            bool add_result = ShapeBuilder.AddPoint(e.Location);
+            if (add_result && comboBox1.SelectedIndex != 2)
+            {
+                switch (comboBox1.SelectedIndex)
+                {
+                    case 0:
+                        shapes.Add((ShapePoint)ShapeBuilder.GetShape());
+                        break;
+                    case 1:
+                        shapes.Add((Segment)ShapeBuilder.GetShape());
+                        break;
+                }
+                comboBox1.Enabled = true;
+                button1.Enabled = true;
+            }
+            else if (add_result)
+            {
+                button2.Enabled = true;
+            }
+            drawShapes();
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            shapes.Add(ShapeBuilder.GetShape());
+            comboBox1.Enabled = true;
+            button1.Enabled = true;
+            button2.Enabled = false;
+            button2.Visible = false;
+            drawShapes();
         }
     }
 }
