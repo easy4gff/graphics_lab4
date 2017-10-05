@@ -168,7 +168,115 @@ namespace lab4
             }
 
             public virtual void draw(Graphics g, Pen pen) { }
+            
+            // смещение от Андрюхи
+            public void translation(int dx, int dy)
+            {
+                double[,] trans_mat = new double[3, 3];
+                for (int i = 0; i < 3; i++)
+                    for (int j = 0; j < 3; j++)
+                    {
+                        if (i == j)
+                            trans_mat[i, j] = 1;
+                        else
+                            trans_mat[i, j] = 0;
+                    }
+                trans_mat[2, 0] += dx;
+                trans_mat[2, 1] += dy;
 
+                for (int i = 0; i < location.cords.Count; i++)
+                {
+                    double prev_x = location.cords[i].X;
+                    double prev_y = location.cords[i].Y;
+                    double[] new_cords = mats_mult(new List<double> { prev_x, prev_y, 1 }, trans_mat);
+                    location.cords[i] = new Point((int)new_cords[0], (int)new_cords[1]);
+                }
+            }
+
+            // вращение от Андрюхи
+            public void rotation(double phi, Point p)
+            {
+                double[,] rot_mat = new double[3, 3];
+                for (int i = 0; i < 3; i++)
+                    for (int j = 0; j < 3; j++)
+                        rot_mat[i, j] = 0;
+                rot_mat[0, 0] = Math.Cos(phi * Math.PI / 180); // перевод градусов в радианы
+                rot_mat[0, 1] = Math.Sin(phi * Math.PI / 180);
+                rot_mat[1, 0] = -1 * rot_mat[0, 1];
+                rot_mat[1, 1] = rot_mat[0, 0];
+                rot_mat[2, 0] = -1 * p.X * rot_mat[0, 0] + p.Y * rot_mat[0, 1] + p.X;
+                rot_mat[2, 1] = -1 * p.X * rot_mat[0, 1] - p.Y * rot_mat[0, 0] + p.Y;
+                rot_mat[2, 2] = 1;
+
+                for (int i = 0; i < location.cords.Count; i++)
+                {
+                    double prev_x = location.cords[i].X;
+                    double prev_y = location.cords[i].Y;
+                    double[] new_cords = mats_mult(new List<double> { prev_x, prev_y, 1 }, rot_mat);
+                    location.cords[i] = new Point((int)new_cords[0], (int)new_cords[1]);
+                }
+            }
+
+            // растяжение/сжатие от Андрюхи
+            public void dilatation(double alpha, double beta, Point p)
+            {
+                double[,] dil_mat = new double[3, 3];
+                for (int i = 0; i < 3; i++)
+                    for (int j = 0; j < 3; j++)
+                        dil_mat[i, j] = 0;
+                dil_mat[0, 0] = alpha;
+                dil_mat[1, 1] = beta;
+                dil_mat[2, 0] = (1 - alpha) * p.X;
+                dil_mat[2, 1] = (1 - beta) * p.Y;
+                dil_mat[2, 2] = 1;
+
+                for (int i = 0; i < location.cords.Count; i++)
+                {
+                    double prev_x = location.cords[i].X;
+                    double prev_y = location.cords[i].Y;
+                    double[] new_cords = mats_mult(new List<double> { prev_x, prev_y, 1 }, dil_mat);
+                    location.cords[i] = new Point((int)new_cords[0], (int)new_cords[1]);
+                }
+            }
+
+        }
+        
+        // умножение строки на матрицу от Андрюхи
+        static double[] mats_mult(List<double> prev_cords, double[,] aff_mat)
+        {
+            double[] res = new double[2];
+            res[0] = 0;
+            res[1] = 0;
+           
+            for (int i = 0; i < 3; i++)
+                for (int j = 0; j < 2; j++)
+                    res[j] += aff_mat[i, j] * prev_cords[i];
+
+            return res;
+        }
+
+        // поиск точки пересечения рёбер от Андрюхи (TO-DO)
+        static Point segments_crosspoint(Segment s1, Segment s2)
+        {
+            Point res = new Point();
+
+            int p1x = s1.location.cords[0].X;
+            int p1y = s1.location.cords[0].Y;
+            int p2x = s1.location.cords[1].X;
+            int p2y = s1.location.cords[1].Y;
+            int p3x = s2.location.cords[0].X;
+            int p3y = s2.location.cords[0].Y;
+            int p4x = s2.location.cords[1].X;
+            int p4y = s2.location.cords[1].Y;
+
+            double A1 = (p1y - p2y) / (p1x - p2x);
+            double A2 = (p3y - p4y) / (p3x - p4x);
+            double b1 = p1y - A1 * p1x;
+            double b2 = p3y - A2 * p3x;
+            res.X = (int)((b2 - b1) / (A1 - A2));
+            res.Y = (int)(A2 * res.X + b2);
+
+            return res;
         }
 
         // Точка
