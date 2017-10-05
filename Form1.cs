@@ -16,7 +16,61 @@ namespace lab4
         Graphics g;
         Bitmap   mainBitmap;
         Pen bluePen;
-        List<Shape> shapes;
+        //List<Shape> shapes;
+        ListShapes shapes;
+
+        class ListShapes
+        {
+            private List<Shape> data;
+            private Graphics g;
+            private Pen commonPen;
+            private Pen selectedPen;
+            private PictureBox picBoxRef;
+
+            public int selectedIndex;
+
+            public ListShapes(Graphics g, PictureBox pb)
+            {
+                data = new List<Shape>();
+                selectedIndex = -1;
+                commonPen = new Pen(Color.Blue);
+                selectedPen = new Pen(Color.Red);
+                this.g = g;
+                picBoxRef = pb;
+            }
+
+            public void Add(Shape s)
+            {
+                if (IsEmpty())
+                    selectedIndex = 0;
+                data.Add(s);
+                Draw();
+            }
+
+            public bool IsEmpty() 
+            {
+                return data.Count == 0;
+            }
+
+            public Shape GetNext()
+            {
+                if (IsEmpty()) return null;
+
+                selectedIndex = (selectedIndex + 1) % data.Count;
+                Draw();
+                return data[selectedIndex];
+            }
+
+            public void Draw()
+            {
+                for (int i = 0; i < data.Count; ++i)
+                    if (i == selectedIndex)
+                        data[i].draw(g, selectedPen);
+                    else
+                        data[i].draw(g, commonPen);
+                picBoxRef.Invalidate();
+            }
+        }
 
         class ShapeBuilder
         {
@@ -229,12 +283,12 @@ namespace lab4
             }
         }
 
-        public void drawShapes()
+        /*public void drawShapes()
         {
             foreach (Shape s in shapes)
                 s.draw(g, bluePen);
             pictureBox1.Invalidate();
-        }
+        }*/
 
         public void initComboBox() {
             comboBox1.Items.AddRange(new string[] {
@@ -256,7 +310,8 @@ namespace lab4
             pictureBox1.Image = mainBitmap;
 
             initComboBox();
-            shapes = new List<Shape>();
+            //shapes = new List<Shape>();
+            shapes = new ListShapes(g, pictureBox1);
 
             bluePen = new Pen(Color.Blue);
             
@@ -279,10 +334,10 @@ namespace lab4
             Polygon poly = new Polygon(points);
             //poly.draw(g, bluePen);
 
-            shapes.Add(sp);
-            shapes.Add(seg);
-            shapes.Add(poly);
-            drawShapes();
+            //shapes.Add(sp);
+            //shapes.Add(seg);
+            //shapes.Add(poly);
+            //drawShapes();
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -319,7 +374,7 @@ namespace lab4
             {
                 button2.Enabled = true;
             }
-            drawShapes();
+            //drawShapes();
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -329,7 +384,7 @@ namespace lab4
             button1.Enabled = true;
             button2.Enabled = false;
             button2.Visible = false;
-            drawShapes();
+            //drawShapes();
         }
     }
 }
