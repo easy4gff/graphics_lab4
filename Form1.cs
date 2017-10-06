@@ -309,11 +309,60 @@ namespace lab4
             return res;
         }
 
+        // проверка, пересекаются ли отрезки TODO
+		static bool if_segs_cross(Segment s1, Segment s2)
+		{
+			int p1x = s1.location.cords[0].X;
+			int p1y = s1.location.cords[0].Y;
+			int p2x = s1.location.cords[1].X;
+			int p2y = s1.location.cords[1].Y;
+			int p3x = s2.location.cords[0].X;
+			int p3y = s2.location.cords[0].Y;
+			int p4x = s2.location.cords[1].X;
+			int p4y = s2.location.cords[1].Y;
+
+			// считаем, что начальная точка находится левее конечной
+			if (p2x < p1x)
+			{
+				int tmpx = p1x;
+				int tmpy = p1y;
+				p1x = p2x;
+				p1y = p2y;
+				p2x = tmpx;
+				p2y = tmpy;
+			}
+			if (p4x < p3x)
+			{
+				int tmpx = p3x;
+				int tmpy = p3y;
+				p3x = p4x;
+				p3y = p4y;
+				p4x = tmpx;
+				p4y = tmpy;
+			}
+
+			if (p2x < p3x)
+				return false;
+
+			//если оба отрезка вертикальные
+			if ((p1x - p2x == 0) && (p3x - p4x == 0))
+			{
+				//если они лежат на одном X
+				if (p1x == p3x)
+					//проверим пересекаются ли они, т.е. есть ли у них общий Y
+					//для этого возьмём отрицание от случая, когда они НЕ пересекаются
+					if (!(Math.Max(p1y, p2y) < Math.Min(p3y, p4y) || Math.Min(p1y, p2y) > Math.Max(p3y, p4y)))	
+						return true;
+				return false;
+			}
+
+			return true;
+		}
+
         // поиск точки пересечения рёбер от Андрюхи (TO-DO)
         static Point segments_crosspoint(Segment s1, Segment s2)
         {
             Point res = new Point();
-
             int p1x = s1.location.cords[0].X;
             int p1y = s1.location.cords[0].Y;
             int p2x = s1.location.cords[1].X;
@@ -322,6 +371,34 @@ namespace lab4
             int p3y = s2.location.cords[0].Y;
             int p4x = s2.location.cords[1].X;
             int p4y = s2.location.cords[1].Y;
+
+			// считаем, что начальная точка находится левее конечной
+			if (p2x < p1x)
+			{
+				int tmpx = p1x;
+				int tmpy = p1y;
+				p1x = p2x;
+				p1y = p2y;
+				p2x = tmpx;
+				p2y = tmpy;
+			}
+			if (p4x < p3x)
+			{
+				int tmpx = p3x;
+				int tmpy = p3y;
+				p3x = p4x;
+				p3y = p4y;
+				p4x = tmpx;
+				p4y = tmpy;
+			}
+
+			if (p2x < p3x)
+
+			// 1-ый отрезок оси абсцисс
+			if (p1x == p2x)
+			{
+
+			}
 
             double A1 = (p1y - p2y) / (p1x - p2x);
             double A2 = (p3y - p4y) / (p3x - p4x);
