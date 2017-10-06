@@ -27,6 +27,7 @@ namespace lab4
             private Pen selectedPen;
             private PictureBox picBoxRef;
 
+			public Shape selectedShape;
             public int selectedIndex;
 
             public ListShapes(Graphics g, PictureBox pb)
@@ -37,13 +38,19 @@ namespace lab4
                 selectedPen = new Pen(Color.Red);
                 this.g = g;
                 picBoxRef = pb;
+				selectedShape = null;
             }
 
             public void Add(Shape s)
             {
-                if (IsEmpty())
-                    selectedIndex = 0;
-                data.Add(s);
+				if (IsEmpty())
+				{
+					data.Add(s);
+					selectedIndex = 0;
+					selectedShape = data[selectedIndex];
+				}
+				else
+					data.Add(s);
                 Draw();
             }
 
@@ -57,7 +64,9 @@ namespace lab4
                 if (IsEmpty()) return null;
 
                 selectedIndex = (selectedIndex + 1) % data.Count;
-                Draw();
+				selectedShape = data[selectedIndex];
+
+				Draw();
                 return data[selectedIndex];
             }
 
@@ -75,9 +84,18 @@ namespace lab4
         class ShapeBuilder
         {
             static private Shape data;
+			static private Graphics g;
+			static private PictureBox pb;
+			static private Pen pen;
 
             static public bool isInProcess;
             static public bool isComplete;
+
+			static public void Init(Graphics gr, PictureBox p) {
+				g = gr;
+				pb = p;
+				pen = new Pen(Color.Green);
+			}
 
             static public void StartBuilding(int index)
             {
@@ -104,6 +122,15 @@ namespace lab4
                     throw new DataException("Shape is not currently in building process!");
 
                 data.location.cords.Add(p);
+				if (data is Polygon)
+					for (int i = 0; i < data.location.cords.Count - 1; ++i)
+						g.DrawLine(
+							pen,
+							data.location.cords[i],
+							data.location.cords[i + 1]
+						);
+				pb.Invalidate();
+
                 int count = data.location.cords.Count;
                 if (data is ShapePoint && count == 1 ||
                     data is Segment    && count == 2 ||
@@ -416,6 +443,7 @@ namespace lab4
             g = Graphics.FromImage(mainBitmap);
             g.Clear(Color.White);
             pictureBox1.Image = mainBitmap;
+			ShapeBuilder.Init(g, pictureBox1);
 
             initComboBox();
             //shapes = new List<Shape>();

@@ -7,3 +7,12 @@ D:\Programming\Computer Graphics\graphics_lab4\bin\Debug\lab4.exe
 D:\Programming\Computer Graphics\graphics_lab4\bin\Debug\lab4.pdb
 D:\Programming\Computer Graphics\graphics_lab4\obj\Debug\lab4.exe
 D:\Programming\Computer Graphics\graphics_lab4\obj\Debug\lab4.pdb
+D:\_Documents\Visual Studio 2017\Projects\graphics_lab4-master\bin\Debug\lab4.exe.config
+D:\_Documents\Visual Studio 2017\Projects\graphics_lab4-master\bin\Debug\lab4.exe
+D:\_Documents\Visual Studio 2017\Projects\graphics_lab4-master\bin\Debug\lab4.pdb
+D:\_Documents\Visual Studio 2017\Projects\graphics_lab4-master\obj\Debug\graphics_lab4.csprojResolveAssemblyReference.cache
+D:\_Documents\Visual Studio 2017\Projects\graphics_lab4-master\obj\Debug\lab4.Form1.resources
+D:\_Documents\Visual Studio 2017\Projects\graphics_lab4-master\obj\Debug\lab4.Properties.Resources.resources
+D:\_Documents\Visual Studio 2017\Projects\graphics_lab4-master\obj\Debug\graphics_lab4.csproj.GenerateResource.Cache
+D:\_Documents\Visual Studio 2017\Projects\graphics_lab4-master\obj\Debug\lab4.exe
+D:\_Documents\Visual Studio 2017\Projects\graphics_lab4-master\obj\Debug\lab4.pdb
