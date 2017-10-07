@@ -18,6 +18,7 @@ namespace lab4
         Pen bluePen;
         //List<Shape> shapes;
         ListShapes shapes;
+        List<ShapePoint> points;
 
         class ListShapes
         {
@@ -26,19 +27,21 @@ namespace lab4
             private Pen commonPen;
             private Pen selectedPen;
             private PictureBox picBoxRef;
+            private ListBox listBoxRef;
 
-			public Shape selectedShape;
-            public int selectedIndex;
+			//public Shape selectedShape;
+            //public int selectedIndex;
 
-            public ListShapes(Graphics g, PictureBox pb)
+            public ListShapes(Graphics g, PictureBox pb, ListBox lb)
             {
                 data = new List<Shape>();
-                selectedIndex = -1;
+                //selectedIndex = -1;
                 commonPen = new Pen(Color.Blue);
                 selectedPen = new Pen(Color.Red);
                 this.g = g;
                 picBoxRef = pb;
-				selectedShape = null;
+                listBoxRef = lb;
+				//selectedShape = null;
             }
 
             public void Add(Shape s)
@@ -46,11 +49,12 @@ namespace lab4
 				if (IsEmpty())
 				{
 					data.Add(s);
-					selectedIndex = 0;
-					selectedShape = data[selectedIndex];
+					//selectedIndex = 0;
+					//selectedShape = data[selectedIndex];
 				}
 				else
 					data.Add(s);
+                listBoxRef.Items.Add(s.GetType().ToString());
                 Draw();
             }
 
@@ -59,21 +63,33 @@ namespace lab4
                 return data.Count == 0;
             }
 
-            public Shape GetNext()
+            /*public Shape GetNext()
             {
                 if (IsEmpty()) return null;
 
-                selectedIndex = (selectedIndex + 1) % data.Count;
-				selectedShape = data[selectedIndex];
+                //selectedIndex = (selectedIndex + 1) % data.Count;
+				//selectedShape = data[selectedIndex];
 
 				Draw();
-                return data[selectedIndex];
+                //return data[selectedIndex];
+                return data[listBoxRef.SelectedIndex];
+            }*/
+
+            public Shape GetSelectedShape()
+            {
+                return listBoxRef.SelectedIndex == -1 ? null : data[listBoxRef.SelectedIndex];
+            }
+
+            public List<ShapePoint> GetPointsList()
+            {
+                return data.Where(shape => shape is ShapePoint).Select(shape => (ShapePoint)shape).ToList();
             }
 
             public void Draw()
             {
+                g.Clear(Color.White);
                 for (int i = 0; i < data.Count; ++i)
-                    if (i == selectedIndex)
+                    if (i == listBoxRef.SelectedIndex)
                         data[i].draw(g, selectedPen);
                     else
                         data[i].draw(g, commonPen);
@@ -512,6 +528,43 @@ namespace lab4
             comboBox1.SelectedIndex = 0;
         }
 
+        private void initOptions(Shape s)
+        {
+            if (s == null)
+            {
+                groupBox2.Visible = false;
+                return;
+            }
+
+            comboBox2.Items.Clear();
+            groupBox2.Visible = true;
+            textBox3.Text = "";
+
+            points = new List<ShapePoint>();
+            points = shapes.GetPointsList();
+            for (int i = 0; i < points.Count; ++i)
+                comboBox2.Items.Add("Точка " + i.ToString());
+            comboBox2.SelectedIndex = -1;
+        }
+
+        private bool angleIsSet()
+        {
+            try
+            {
+                int.Parse(textBox3.Text);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private bool canRotate()
+        {
+            return angleIsSet() && comboBox2.SelectedIndex != -1;
+        }
+
         public Form1()
         {
             InitializeComponent();
@@ -524,7 +577,7 @@ namespace lab4
 
             initComboBox();
             //shapes = new List<Shape>();
-            shapes = new ListShapes(g, pictureBox1);
+            shapes = new ListShapes(g, pictureBox1, listBox1);
 
             bluePen = new Pen(Color.Blue);
             
@@ -598,6 +651,41 @@ namespace lab4
             button2.Enabled = false;
             button2.Visible = false;
             //drawShapes();
+        }
+
+        private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            shapes.Draw();
+            initOptions(shapes.GetSelectedShape());
+        }
+
+        private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            g.Clear(Color.White);
+            shapes.Draw();
+            g.FillEllipse(
+                new SolidBrush(Color.Violet),
+                points[comboBox2.SelectedIndex].location.cords[0].X - 5,
+                points[comboBox2.SelectedIndex].location.cords[0].Y - 5,
+                10,
+                10
+            );
+            pictureBox1.Invalidate();
+            button6.Enabled = canRotate();
+        }
+
+        private void textBox3_TextChanged(object sender, EventArgs e)
+        {
+            button6.Enabled = canRotate();
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            shapes.GetSelectedShape().rotation(
+                int.Parse(textBox3.Text),
+                points[comboBox2.SelectedIndex].location.cords.First()
+            );
+            shapes.Draw();
         }
     }
 }
