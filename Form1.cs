@@ -20,6 +20,8 @@ namespace lab4
         ListShapes shapes;
         List<ShapePoint> points;
 
+        bool crosspointMode;
+
         class ListShapes
         {
             private List<Shape> data;
@@ -566,6 +568,8 @@ namespace lab4
                 groupBox1.Visible = false;
                 groupBox2.Visible = false;
                 groupBox3.Visible = false;
+                groupBox4.Visible = false;
+                groupBox5.Visible = false;
                 return;
             }
 
@@ -581,6 +585,16 @@ namespace lab4
                 comboBox2.Items.Add("Точка " + i.ToString());
             comboBox2.SelectedIndex = -1;
 
+            if (s is Segment)
+            {
+                groupBox4.Visible = true;
+                groupBox5.Visible = true;
+            }
+            else
+            {
+                groupBox4.Visible = false;
+                groupBox5.Visible = false;
+            }
         }
 
         private bool angleIsSet()
@@ -629,6 +643,25 @@ namespace lab4
             }
         }
 
+        private void handleCrossPoint(Point crossPoint)
+        {
+            int x = crossPoint.X;
+            int y = crossPoint.Y;
+
+            textBox6.Text = x.ToString();
+            textBox7.Text = y.ToString();
+
+            g.FillEllipse(
+                new SolidBrush(Color.DarkOrchid),
+                x - 5,
+                y - 5,
+                10,
+                10
+            );
+
+            pictureBox1.Invalidate();
+        }
+
         public Form1()
         {
             InitializeComponent();
@@ -644,30 +677,7 @@ namespace lab4
             shapes = new ListShapes(g, pictureBox1, listBox1);
 
             bluePen = new Pen(Color.Blue);
-            
-
-            Point p1 = new Point(0, 0);
-            ShapePoint sp = new ShapePoint(p1);
-            //sp.draw(g, bluePen);
-
-            Segment seg = new Segment(new Point(100, 100), new Point(250, 250));
-            //seg.draw(g, bluePen);
-
-            Point p11 = new Point(0, 0);
-            Point p2 = new Point(280, 120);
-            Point p3 = new Point(105, 110);
-            Point p4 = new Point(95, 84);
-            Point p5 = new Point(49, 50);
-            Point p6 = new Point(30, 20);
-            List<Point> points = new List<Point>();
-            points.AddRange(new Point[] { p11, p2, p3, p4, p5, p6 });
-            Polygon poly = new Polygon(points);
-            //poly.draw(g, bluePen);
-
-            //shapes.Add(sp);
-            //shapes.Add(seg);
-            //shapes.Add(poly);
-            //drawShapes();
+            crosspointMode = false;
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -694,7 +704,17 @@ namespace lab4
                         shapes.Add((ShapePoint)ShapeBuilder.GetShape());
                         break;
                     case 1:
-                        shapes.Add((Segment)ShapeBuilder.GetShape());
+                        Segment result_seg = (Segment)ShapeBuilder.GetShape();
+                        shapes.Add(result_seg);
+                        if (crosspointMode)
+                        {
+                            Point crossPoint = segments_crosspoint(
+                                result_seg,
+                                (Segment)shapes.GetSelectedShape()
+                            );
+                            handleCrossPoint(crossPoint);
+                            crosspointMode = false;
+                        }
                         break;
                 }
                 comboBox1.Enabled = true;
@@ -778,6 +798,22 @@ namespace lab4
                 double.Parse(textBox5.Text)
             );
             shapes.Draw();
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            shapes.GetSelectedShape().rotation(
+                90,
+                shapes.GetSelectedShape().getShapeCenter()
+            );
+            shapes.Draw();
+        }
+
+        private void button7_Click(object sender, EventArgs e)
+        {
+            comboBox1.SelectedIndex = 1;
+            button1_Click(this, new EventArgs());
+            crosspointMode = true;
         }
     }
 }
