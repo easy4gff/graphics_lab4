@@ -336,6 +336,37 @@ namespace lab4
                 }
             }
 
+            public void scale(double alpha, double beta)
+            {
+                dilatation(alpha, beta, getShapeCenter());
+            }
+
+            public Point getShapeCenter()
+            {
+                int leftLimit;
+                int rightLimit;
+                int topLimit;
+                int bottomLimit;
+                leftLimit = rightLimit = location.cords[0].X;
+                topLimit = bottomLimit = location.cords[0].Y;
+                for (int i = 1; i < location.cords.Count; ++i)
+                {
+                    int x = location.cords[i].X;
+                    int y = location.cords[i].Y;
+
+                    if (x < leftLimit)
+                        leftLimit = x;
+                    else if (x > rightLimit)
+                        rightLimit = x;
+
+                    if (y < bottomLimit)
+                        bottomLimit = y;
+                    else if (y > topLimit)
+                        topLimit = y;
+                }
+
+                return new Point((rightLimit + leftLimit) / 2, (topLimit + bottomLimit) / 2);
+            }
         }
         
         // умножение строки на матрицу от Андрюхи
@@ -532,19 +563,24 @@ namespace lab4
         {
             if (s == null)
             {
+                groupBox1.Visible = false;
                 groupBox2.Visible = false;
+                groupBox3.Visible = false;
                 return;
             }
 
             comboBox2.Items.Clear();
+            groupBox1.Visible = true;
             groupBox2.Visible = true;
-            textBox3.Text = "";
+            groupBox3.Visible = true;
+            textBox1.Text = textBox2.Text = textBox3.Text = textBox4.Text = textBox5.Text = "";
 
             points = new List<ShapePoint>();
             points = shapes.GetPointsList();
             for (int i = 0; i < points.Count; ++i)
                 comboBox2.Items.Add("Точка " + i.ToString());
             comboBox2.SelectedIndex = -1;
+
         }
 
         private bool angleIsSet()
@@ -563,6 +599,34 @@ namespace lab4
         private bool canRotate()
         {
             return angleIsSet() && comboBox2.SelectedIndex != -1;
+        }
+
+        private bool canTranslate()
+        {
+            try
+            {
+                int.Parse(textBox1.Text);
+                int.Parse(textBox2.Text);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private bool canScale()
+        {
+            try
+            {
+                double.Parse(textBox4.Text);
+                double.Parse(textBox5.Text);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public Form1()
@@ -684,6 +748,34 @@ namespace lab4
             shapes.GetSelectedShape().rotation(
                 int.Parse(textBox3.Text),
                 points[comboBox2.SelectedIndex].location.cords.First()
+            );
+            shapes.Draw();
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            button3.Enabled = canTranslate();
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            shapes.GetSelectedShape().translation(
+                int.Parse(textBox1.Text),
+                int.Parse(textBox2.Text)
+            );
+            shapes.Draw();
+        }
+
+        private void textBox4_TextChanged(object sender, EventArgs e)
+        {
+            button4.Enabled = canScale();
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            shapes.GetSelectedShape().scale(
+                double.Parse(textBox4.Text),
+                double.Parse(textBox5.Text)
             );
             shapes.Draw();
         }
