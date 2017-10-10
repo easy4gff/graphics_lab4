@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -385,60 +385,69 @@ namespace lab4
             return res;
         }
 
-        // проверка, пересекаются ли отрезки TODO
-		static bool if_segs_cross(Segment s1, Segment s2)
-		{
-			int p1x = s1.location.cords[0].X;
-			int p1y = s1.location.cords[0].Y;
-			int p2x = s1.location.cords[1].X;
-			int p2y = s1.location.cords[1].Y;
-			int p3x = s2.location.cords[0].X;
-			int p3y = s2.location.cords[0].Y;
-			int p4x = s2.location.cords[1].X;
-			int p4y = s2.location.cords[1].Y;
+        const double EPS = 1E-9;
 
-			// считаем, что начальная точка находится левее конечной
-			if (p2x < p1x)
-			{
-				int tmpx = p1x;
-				int tmpy = p1y;
-				p1x = p2x;
-				p1y = p2y;
-				p2x = tmpx;
-				p2y = tmpy;
-			}
-			if (p4x < p3x)
-			{
-				int tmpx = p3x;
-				int tmpy = p3y;
-				p3x = p4x;
-				p3y = p4y;
-				p4x = tmpx;
-				p4y = tmpy;
-			}
-
-			if (p2x < p3x)
-				return false;
-
-			//если оба отрезка вертикальные
-			if ((p1x - p2x == 0) && (p3x - p4x == 0))
-			{
-				//если они лежат на одном X
-				if (p1x == p3x)
-					//проверим пересекаются ли они, т.е. есть ли у них общий Y
-					//для этого возьмём отрицание от случая, когда они НЕ пересекаются
-					if (!(Math.Max(p1y, p2y) < Math.Min(p3y, p4y) || Math.Min(p1y, p2y) > Math.Max(p3y, p4y)))	
-						return true;
-				return false;
-			}
-
-			return true;
-		}
-
-        // поиск точки пересечения рёбер от Андрюхи (TO-DO)
-        static Point segments_crosspoint(Segment s1, Segment s2)
+        static int det(int a, int b, int c, int d)
         {
-            Point res = new Point();
+            return a * d - b * c;
+        }
+
+        static bool between(int a, int b, double c)
+        {
+            return Math.Min(a, b) <= c + EPS && c <= Math.Max(a, b) + EPS;
+        }
+
+        // тоже чё-то проверяет
+        static bool intersect_1(int a, int b, int c, int d)
+        {
+            if (a > b)
+            {
+                int t = a;
+                a = b;
+                b = t;
+            }
+            if (c > d)
+            {
+                int t = c;
+                c = d;
+                d = t;
+            }
+            return Math.Max(a, c) <= Math.Min(b, d);
+        }
+
+        // проверка, пересекаются ли отрезки
+        static bool intersect(Segment s1, Segment s2)
+        {
+            int ax = s1.location.cords[0].X;
+            int ay = s1.location.cords[0].Y;
+            int bx = s1.location.cords[1].X;
+            int by = s1.location.cords[1].Y;
+            int cx = s2.location.cords[0].X;
+            int cy = s2.location.cords[0].Y;
+            int dx = s2.location.cords[1].X;
+            int dy = s2.location.cords[1].Y;
+
+            int A1 = ay - by, B1 = bx - ax, C1 = -A1 * ax - B1 * ay;
+            int A2 = cy - dy, B2 = dx - cx, C2 = -A2 * cx - B2 * cy;
+            int zn = det(A1, B1, A2, B2);
+            if (zn != 0)
+            {
+                double x = -det(C1, B1, C2, B2) * 1.0 / zn;
+                double y = -det(A1, C1, A2, C2) * 1.0 / zn;
+                return between(ax, bx, x) && between(ay, by, y) && between(cx, dx, x) && between(cy, dy, y);
+            }
+            else
+                return det(A1, C1, A2, C2) == 0 && det(B1, C1, B2, C2) == 0 && intersect_1(ax, bx, cx, dx) && intersect_1(ay, by, cy, dy);
+        }
+
+        // поиск точек пересечения рёбер от Андрюхи
+        static Point[] segments_crosspoint(Segment s1, Segment s2)
+        {
+            Point[] res = new Point[1];
+
+            if (!intersect(s1, s2))
+                return null;
+
             int p1x = s1.location.cords[0].X;
             int p1y = s1.location.cords[0].Y;
             int p2x = s1.location.cords[1].X;
@@ -448,40 +457,182 @@ namespace lab4
             int p4x = s2.location.cords[1].X;
             int p4y = s2.location.cords[1].Y;
 
-			// считаем, что начальная точка находится левее конечной
-			if (p2x < p1x)
-			{
-				int tmpx = p1x;
-				int tmpy = p1y;
-				p1x = p2x;
-				p1y = p2y;
-				p2x = tmpx;
-				p2y = tmpy;
-			}
-			if (p4x < p3x)
-			{
-				int tmpx = p3x;
-				int tmpy = p3y;
-				p3x = p4x;
-				p3y = p4y;
-				p4x = tmpx;
-				p4y = tmpy;
-			}
+            if (p1x > p2x)
+            {
+                int tmpx = p1x;
+                p1x = p2x;
+                p2x = tmpx;
 
-			if (p2x < p3x)
+                int tmpy = p1y;
+                p1y = p2y;
+                p2y = tmpy;
+            }
+            if (p3x > p4x)
+            {
+                int tmpx = p3x;
+                p3x = p4x;
+                p4x = tmpx;
 
-			// 1-ый отрезок оси абсцисс
-			if (p1x == p2x)
-			{
+                int tmpy = p3y;
+                p3y = p4y;
+                p4y = tmpy;
+            }
 
-			}
+            // отрезки перпендикулярны (один горизонтален, второй вертикален)
+            if (p1x == p2x && p3y == p4y)
+            {
+                res[0].X = p1x;
+                res[0].Y = p3y;
+            }
+            else if (p1y == p2y && p3x == p4x)
+            {
+                res[0].X = p3x;
+                res[0].Y = p1y;
+            }
+            // отрезки "накладываются" друг на друга (оба вертикальны)
+            else if ((p1x == p2x) && (p3x == p4x))
+            {
+                if (between(p1y, p2y, p3y) && between(p1y, p2y, p4y))
+                {
+                    int p5 = Math.Min(p3y, p4y);
+                    int p6 = Math.Max(p3y, p4y);
+                    res = new Point[p6 - p5];
+                    for (int i = p5, k = 0; i < p6; i++, k++)
+                    {
+                        res[k].X = p1x;
+                        res[k].Y = i;
+                    }
+                }
+                else if (between(p3y, p4y, p1y) && between(p3y, p4y, p2y))
+                {
+                    int p5 = Math.Min(p1y, p2y);
+                    int p6 = Math.Max(p1y, p2y);
+                    res = new Point[p6 - p5];
+                    for (int i = p5, k = 0; i < p6; i++, k++)
+                    {
+                        res[k].X = p1x;
+                        res[k].Y = i;
+                    }
+                }
+                else
+                {
+                    int max12 = Math.Max(p1y, p2y);
+                    int max34 = Math.Max(p3y, p4y);
+                    int p5, p6;
+                    if (max12 < max34)
+                    {
+                        p6 = max12;
+                        p5 = Math.Min(p3y, p4y);
+                    }
+                    else
+                    {
+                        p6 = max34;
+                        p5 = Math.Min(p1y, p2y);
+                    }
 
-            double A1 = (p1y - p2y) / (p1x - p2x);
-            double A2 = (p3y - p4y) / (p3x - p4x);
-            double b1 = p1y - A1 * p1x;
-            double b2 = p3y - A2 * p3x;
-            res.X = (int)((b2 - b1) / (A1 - A2));
-            res.Y = (int)(A2 * res.X + b2);
+                    res = new Point[p6 - p5];
+                    for (int i = p5, k = 0; i < p6; i++, k++)
+                    {
+                        res[k].X = p1x;
+                        res[k].Y = i;
+                    }
+                }
+            }
+            // 1-ый отрезок вертикален
+            else if (p1x == p2x)
+            {
+                int a = Math.Abs(p2x - p4x);
+                double tg = Math.Abs(p3y - p4y) / Math.Abs(p3x - p4x);
+                int b = (int)(a * tg);
+                res[0].X = p1x;
+                res[0].Y = Math.Max(p3y, p4y) - b;
+            }
+            // 2-ой отрезок вертикален
+            else if (p3x == p4x)
+            {
+                int a = Math.Abs(p4x - p2x);
+                double tg = Math.Abs(p2y - p1y) / Math.Abs(p2x - p1x);
+                int b = (int)(a * tg);
+                res[0].X = p3x;
+                res[0].Y = Math.Max(p1y, p2y) - b;
+            }
+            // отрезки "накладываются" друг на друга (оба горизонтальны)
+            else if ((p1y == p2y) && (p3y == p4y))
+            {
+                if (between(p1x, p2x, p3x) && between(p1x, p2x, p4x))
+                {
+                    int p5 = Math.Min(p3x, p4x);
+                    int p6 = Math.Max(p3x, p4x);
+                    res = new Point[p6 - p5];
+                    for (int i = p5, k = 0; i < p6; i++, k++)
+                    {
+                        res[k].X = i;
+                        res[k].Y = p1y;
+                    }
+                }
+                else if (between(p3x, p4x, p1x) && between(p3x, p4x, p2x))
+                {
+                    int p5 = Math.Min(p1x, p2x);
+                    int p6 = Math.Max(p1x, p2x);
+                    res = new Point[p6 - p5];
+                    for (int i = p5, k = 0; i < p6; i++, k++)
+                    {
+                        res[k].X = i;
+                        res[k].Y = p1y;
+                    }
+                }
+                else
+                {
+                    int max12 = Math.Max(p1x, p2x);
+                    int max34 = Math.Max(p3x, p4x);
+                    int p5, p6;
+                    if (max12 < max34)
+                    {
+                        p6 = max12;
+                        p5 = Math.Min(p3x, p4x);
+                    }
+                    else
+                    {
+                        p6 = max34;
+                        p5 = Math.Min(p1x, p2x);
+                    }
+
+                    res = new Point[p6 - p5];
+                    for (int i = p5, k = 0; i < p6; i++, k++)
+                    {
+                        res[k].X = i;
+                        res[k].Y = p1y;
+                    }
+                }
+            }
+            // 1-ый отрезок горизонтален
+            else if (p1y == p2y)
+            {
+                int a = Math.Abs(p2y - p4y);
+                double tg = (double)(p4x - p3x) / Math.Abs(p3y - p4y);
+                int b = (int)(a * tg);
+                res[0].X = p4x - b;
+                res[0].Y = p1y;
+            }
+            // 2-ой отрезок горизонтален
+            else if (p3y == p4y)
+            {
+                int a = Math.Abs(p2y - p4y);
+                double tg = (double)(p2x - p1x) / Math.Abs(p1y - p2y);
+                int b = (int)(a * tg);
+                res[0].X = p2x - b;
+                res[0].Y = p3y;
+            }
+            // обычный случай
+            else
+            {
+                double A1 = (p1y - p2y) / (p1x - p2x);
+                double A2 = (p3y - p4y) / (p3x - p4x);
+                double b1 = p1y - A1 * p1x;
+                double b2 = p3y - A2 * p3x;
+                res[0].X = (int)((b2 - b1) / (A1 - A2));
+                res[0].Y = (int)(A2 * res[0].X + b2);
+            }
 
             return res;
         }
@@ -708,11 +859,11 @@ namespace lab4
                         shapes.Add(result_seg);
                         if (crosspointMode)
                         {
-                            Point crossPoint = segments_crosspoint(
+                            Point[] crossPoint = segments_crosspoint(
                                 result_seg,
                                 (Segment)shapes.GetSelectedShape()
                             );
-                            handleCrossPoint(crossPoint);
+                            handleCrossPoint(crossPoint[0]);
                             crosspointMode = false;
                         }
                         break;
