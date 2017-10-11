@@ -268,7 +268,7 @@ namespace lab4
 
             public virtual void draw(Graphics g, Pen pen) { }
             
-            // смещение от Андрюхи
+            // смещение
             public void translation(int dx, int dy)
             {
                 double[,] trans_mat = new double[3, 3];
@@ -292,7 +292,7 @@ namespace lab4
                 }
             }
 
-            // вращение от Андрюхи
+            // вращение
             public void rotation(double phi, Point p)
             {
                 double[,] rot_mat = new double[3, 3];
@@ -316,7 +316,7 @@ namespace lab4
                 }
             }
 
-            // растяжение/сжатие от Андрюхи
+            // растяжение/сжатие
             public void dilatation(double alpha, double beta, Point p)
             {
                 double[,] dil_mat = new double[3, 3];
@@ -371,7 +371,7 @@ namespace lab4
             }
         }
         
-        // умножение строки на матрицу от Андрюхи
+        // умножение строки на матрицу
         static double[] mats_mult(List<double> prev_cords, double[,] aff_mat)
         {
             double[] res = new double[2];
@@ -416,38 +416,36 @@ namespace lab4
         }
 
         // проверка, пересекаются ли отрезки
-        static bool intersect(Segment s1, Segment s2)
+        //static bool ifintersect(Segment s1, Segment s2)
+        //{
+        //    int p1x = s1.location.cords[0].X;
+        //    int p1y = s1.location.cords[0].Y;
+        //    int p2x = s1.location.cords[1].X;
+        //    int p2y = s1.location.cords[1].Y;
+        //    int p3x = s2.location.cords[0].X;
+        //    int p3y = s2.location.cords[0].Y;
+        //    int p4x = s2.location.cords[1].X;
+        //    int p4y = s2.location.cords[1].Y;
+
+        //    int A1 = p1y - p2y;
+        //    int B1 = p2x - p1x;
+        //    int C1 = -A1 * p1x - B1 * p1y;
+        //    int A2 = p3y - p4y;
+        //    int B2 = p4x - p3x;
+        //    int C2 = -A2 * p3x - B2 * p3y;
+        //    int zn = det(A1, B1, A2, B2);
+        //    if (zn != 0)
+        //    {
+        //        double x = -det(C1, B1, C2, B2) * 1.0 / zn;
+        //        double y = -det(A1, C1, A2, C2) * 1.0 / zn;
+        //        return between(p1x, p2x, x) && between(p1y, p2y, y) && between(p3x, p4x, x) && between(p3y, p4y, y);
+        //    }
+        //    else
+        //        return det(A1, C1, A2, C2) == 0 && det(B1, C1, B2, C2) == 0 && intersect_1(p1x, p2x, p3x, p4x) && intersect_1(p1y, p2y, p3y, p4y);
+        //}
+
+        static Point segments_crosspoint(Segment s1, Segment s2, out bool b)
         {
-            int ax = s1.location.cords[0].X;
-            int ay = s1.location.cords[0].Y;
-            int bx = s1.location.cords[1].X;
-            int by = s1.location.cords[1].Y;
-            int cx = s2.location.cords[0].X;
-            int cy = s2.location.cords[0].Y;
-            int dx = s2.location.cords[1].X;
-            int dy = s2.location.cords[1].Y;
-
-            int A1 = ay - by, B1 = bx - ax, C1 = -A1 * ax - B1 * ay;
-            int A2 = cy - dy, B2 = dx - cx, C2 = -A2 * cx - B2 * cy;
-            int zn = det(A1, B1, A2, B2);
-            if (zn != 0)
-            {
-                double x = -det(C1, B1, C2, B2) * 1.0 / zn;
-                double y = -det(A1, C1, A2, C2) * 1.0 / zn;
-                return between(ax, bx, x) && between(ay, by, y) && between(cx, dx, x) && between(cy, dy, y);
-            }
-            else
-                return det(A1, C1, A2, C2) == 0 && det(B1, C1, B2, C2) == 0 && intersect_1(ax, bx, cx, dx) && intersect_1(ay, by, cy, dy);
-        }
-
-        // поиск точек пересечения рёбер от Андрюхи
-        static Point[] segments_crosspoint(Segment s1, Segment s2)
-        {
-            Point[] res = new Point[1];
-
-            if (!intersect(s1, s2))
-                return null;
-
             int p1x = s1.location.cords[0].X;
             int p1y = s1.location.cords[0].Y;
             int p2x = s1.location.cords[1].X;
@@ -457,187 +455,57 @@ namespace lab4
             int p4x = s2.location.cords[1].X;
             int p4y = s2.location.cords[1].Y;
 
-            if (p1x > p2x)
+            int A1 = p1y - p2y;
+            int B1 = p2x - p1x;
+            int C1 = -A1 * p1x - B1 * p1y;
+            int A2 = p3y - p4y;
+            int B2 = p4x - p3x;
+            int C2 = -A2 * p3x - B2 * p3y;
+            int zn = det(A1, B1, A2, B2);
+            if (zn != 0)
             {
-                int tmpx = p1x;
-                p1x = p2x;
-                p2x = tmpx;
-
-                int tmpy = p1y;
-                p1y = p2y;
-                p2y = tmpy;
+                double x = -det(C1, B1, C2, B2) * 1.0 / zn;
+                double y = -det(A1, C1, A2, C2) * 1.0 / zn;
+                b = between(p1x, p2x, x) && between(p1y, p2y, y) && between(p3x, p4x, x) && between(p3y, p4y, y);
+                if (b)
+                    return new Point((int)x, (int)y);
             }
-            if (p3x > p4x)
-            {
-                int tmpx = p3x;
-                p3x = p4x;
-                p4x = tmpx;
-
-                int tmpy = p3y;
-                p3y = p4y;
-                p4y = tmpy;
-            }
-
-            // отрезки перпендикулярны (один горизонтален, второй вертикален)
-            if (p1x == p2x && p3y == p4y)
-            {
-                res[0].X = p1x;
-                res[0].Y = p3y;
-            }
-            else if (p1y == p2y && p3x == p4x)
-            {
-                res[0].X = p3x;
-                res[0].Y = p1y;
-            }
-            // отрезки "накладываются" друг на друга (оба вертикальны)
-            else if ((p1x == p2x) && (p3x == p4x))
-            {
-                if (between(p1y, p2y, p3y) && between(p1y, p2y, p4y))
-                {
-                    int p5 = Math.Min(p3y, p4y);
-                    int p6 = Math.Max(p3y, p4y);
-                    res = new Point[p6 - p5];
-                    for (int i = p5, k = 0; i < p6; i++, k++)
-                    {
-                        res[k].X = p1x;
-                        res[k].Y = i;
-                    }
-                }
-                else if (between(p3y, p4y, p1y) && between(p3y, p4y, p2y))
-                {
-                    int p5 = Math.Min(p1y, p2y);
-                    int p6 = Math.Max(p1y, p2y);
-                    res = new Point[p6 - p5];
-                    for (int i = p5, k = 0; i < p6; i++, k++)
-                    {
-                        res[k].X = p1x;
-                        res[k].Y = i;
-                    }
-                }
-                else
-                {
-                    int max12 = Math.Max(p1y, p2y);
-                    int max34 = Math.Max(p3y, p4y);
-                    int p5, p6;
-                    if (max12 < max34)
-                    {
-                        p6 = max12;
-                        p5 = Math.Min(p3y, p4y);
-                    }
-                    else
-                    {
-                        p6 = max34;
-                        p5 = Math.Min(p1y, p2y);
-                    }
-
-                    res = new Point[p6 - p5];
-                    for (int i = p5, k = 0; i < p6; i++, k++)
-                    {
-                        res[k].X = p1x;
-                        res[k].Y = i;
-                    }
-                }
-            }
-            // 1-ый отрезок вертикален
-            else if (p1x == p2x)
-            {
-                int a = Math.Abs(p2x - p4x);
-                double tg = Math.Abs(p3y - p4y) / Math.Abs(p3x - p4x);
-                int b = (int)(a * tg);
-                res[0].X = p1x;
-                res[0].Y = Math.Max(p3y, p4y) - b;
-            }
-            // 2-ой отрезок вертикален
-            else if (p3x == p4x)
-            {
-                int a = Math.Abs(p4x - p2x);
-                double tg = Math.Abs(p2y - p1y) / Math.Abs(p2x - p1x);
-                int b = (int)(a * tg);
-                res[0].X = p3x;
-                res[0].Y = Math.Max(p1y, p2y) - b;
-            }
-            // отрезки "накладываются" друг на друга (оба горизонтальны)
-            else if ((p1y == p2y) && (p3y == p4y))
-            {
-                if (between(p1x, p2x, p3x) && between(p1x, p2x, p4x))
-                {
-                    int p5 = Math.Min(p3x, p4x);
-                    int p6 = Math.Max(p3x, p4x);
-                    res = new Point[p6 - p5];
-                    for (int i = p5, k = 0; i < p6; i++, k++)
-                    {
-                        res[k].X = i;
-                        res[k].Y = p1y;
-                    }
-                }
-                else if (between(p3x, p4x, p1x) && between(p3x, p4x, p2x))
-                {
-                    int p5 = Math.Min(p1x, p2x);
-                    int p6 = Math.Max(p1x, p2x);
-                    res = new Point[p6 - p5];
-                    for (int i = p5, k = 0; i < p6; i++, k++)
-                    {
-                        res[k].X = i;
-                        res[k].Y = p1y;
-                    }
-                }
-                else
-                {
-                    int max12 = Math.Max(p1x, p2x);
-                    int max34 = Math.Max(p3x, p4x);
-                    int p5, p6;
-                    if (max12 < max34)
-                    {
-                        p6 = max12;
-                        p5 = Math.Min(p3x, p4x);
-                    }
-                    else
-                    {
-                        p6 = max34;
-                        p5 = Math.Min(p1x, p2x);
-                    }
-
-                    res = new Point[p6 - p5];
-                    for (int i = p5, k = 0; i < p6; i++, k++)
-                    {
-                        res[k].X = i;
-                        res[k].Y = p1y;
-                    }
-                }
-            }
-            // 1-ый отрезок горизонтален
-            else if (p1y == p2y)
-            {
-                int a = Math.Abs(p2y - p4y);
-                double tg = (double)(p4x - p3x) / Math.Abs(p3y - p4y);
-                int b = (int)(a * tg);
-                res[0].X = p4x - b;
-                res[0].Y = p1y;
-            }
-            // 2-ой отрезок горизонтален
-            else if (p3y == p4y)
-            {
-                int a = Math.Abs(p2y - p4y);
-                double tg = (double)(p2x - p1x) / Math.Abs(p1y - p2y);
-                int b = (int)(a * tg);
-                res[0].X = p2x - b;
-                res[0].Y = p3y;
-            }
-            // обычный случай
             else
-            {
-                double A1 = (p1y - p2y) / (p1x - p2x);
-                double A2 = (p3y - p4y) / (p3x - p4x);
-                double b1 = p1y - A1 * p1x;
-                double b2 = p3y - A2 * p3x;
-                res[0].X = (int)((b2 - b1) / (A1 - A2));
-                res[0].Y = (int)(A2 * res[0].X + b2);
-            }
-
-            return res;
+                b = det(A1, C1, A2, C2) == 0 && det(B1, C1, B2, C2) == 0 && intersect_1(p1x, p2x, p3x, p4x) && intersect_1(p1y, p2y, p3y, p4y);
+            return new Point(-10, -10);
         }
 
-        // Точка
+        // поиск точки пересечения
+        //static Point segments_crosspoint(Segment s1, Segment s2)
+        //{
+        //    Point res = new Point();
+
+        //    if (!ifintersect(s1, s2))
+        //        return res;
+
+        //    int p1x = s1.location.cords[0].X;
+        //    int p1y = s1.location.cords[0].Y;
+        //    int p2x = s1.location.cords[1].X;
+        //    int p2y = s1.location.cords[1].Y;
+        //    int p3x = s2.location.cords[0].X;
+        //    int p3y = s2.location.cords[0].Y;
+        //    int p4x = s2.location.cords[1].X;
+        //    int p4y = s2.location.cords[1].Y;
+
+        //    int A1 = p1y - p2y;
+        //    int B1 = p2x - p1x;
+        //    int C1 = p1x * p2y - p2x * p1y;
+        //    int A2 = p3y - p4y;
+        //    int B2 = p4x - p3x;
+        //    int C2 = p3x * p4y - p4x * p3y;
+
+        //    double det = A1 * B2 - A2 * B1;
+        //    res.X = -(int)((C1 * B2 - C2 * B1) / det);
+        //    res.Y = -(int)((A1 * C2 - A2 * C1) / det);
+
+        //    return res;
+        //}
+
         class ShapePoint : Shape {
             public ShapePoint() {}
 
@@ -859,11 +727,15 @@ namespace lab4
                         shapes.Add(result_seg);
                         if (crosspointMode)
                         {
-                            Point[] crossPoint = segments_crosspoint(
+                            bool b;
+                            Point crossPoint = segments_crosspoint(
                                 result_seg,
-                                (Segment)shapes.GetSelectedShape()
+                                (Segment)shapes.GetSelectedShape(),
+                                out b
                             );
-                            handleCrossPoint(crossPoint[0]);
+                            //if (!b)
+                                // сделать что-то страшное
+                            handleCrossPoint(crossPoint);
                             crosspointMode = false;
                         }
                         break;
