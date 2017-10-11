@@ -444,7 +444,7 @@ namespace lab4
         //        return det(A1, C1, A2, C2) == 0 && det(B1, C1, B2, C2) == 0 && intersect_1(p1x, p2x, p3x, p4x) && intersect_1(p1y, p2y, p3y, p4y);
         //}
 
-        static Point segments_crosspoint(Segment s1, Segment s2, out bool b)
+        static Point segments_crosspoint(Segment s1, Segment s2)
         {
             int p1x = s1.location.cords[0].X;
             int p1y = s1.location.cords[0].Y;
@@ -455,6 +455,9 @@ namespace lab4
             int p4x = s2.location.cords[1].X;
             int p4y = s2.location.cords[1].Y;
 
+            double x = 0;
+            double y = 0;
+
             int A1 = p1y - p2y;
             int B1 = p2x - p1x;
             int C1 = -A1 * p1x - B1 * p1y;
@@ -464,14 +467,13 @@ namespace lab4
             int zn = det(A1, B1, A2, B2);
             if (zn != 0)
             {
-                double x = -det(C1, B1, C2, B2) * 1.0 / zn;
-                double y = -det(A1, C1, A2, C2) * 1.0 / zn;
-                b = between(p1x, p2x, x) && between(p1y, p2y, y) && between(p3x, p4x, x) && between(p3y, p4y, y);
-                if (b)
+                x = -det(C1, B1, C2, B2) * 1.0 / zn;
+                y = -det(A1, C1, A2, C2) * 1.0 / zn;
+                if (between(p1x, p2x, x) && between(p1y, p2y, y) && between(p3x, p4x, x) && between(p3y, p4y, y))
                     return new Point((int)x, (int)y);
             }
-            else
-                b = det(A1, C1, A2, C2) == 0 && det(B1, C1, B2, C2) == 0 && intersect_1(p1x, p2x, p3x, p4x) && intersect_1(p1y, p2y, p3y, p4y);
+            else if (det(A1, C1, A2, C2) == 0 && det(B1, C1, B2, C2) == 0 && intersect_1(p1x, p2x, p3x, p4x) && intersect_1(p1y, p2y, p3y, p4y))
+                return new Point((int)x, (int)y);
             return new Point(-10, -10);
         }
 
@@ -727,13 +729,11 @@ namespace lab4
                         shapes.Add(result_seg);
                         if (crosspointMode)
                         {
-                            bool b;
                             Point crossPoint = segments_crosspoint(
                                 result_seg,
-                                (Segment)shapes.GetSelectedShape(),
-                                out b
+                                (Segment)shapes.GetSelectedShape()
                             );
-                            //if (!b)
+                            //if (crossPoint.X == -10)
                                 // сделать что-то страшное
                             handleCrossPoint(crossPoint);
                             crosspointMode = false;
