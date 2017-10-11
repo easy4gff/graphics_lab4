@@ -268,7 +268,7 @@ namespace lab4
 
             public virtual void draw(Graphics g, Pen pen) { }
             
-            // смещение
+            // смещение от Андрюхи
             public void translation(int dx, int dy)
             {
                 double[,] trans_mat = new double[3, 3];
@@ -292,7 +292,7 @@ namespace lab4
                 }
             }
 
-            // вращение
+            // вращение от Андрюхи
             public void rotation(double phi, Point p)
             {
                 double[,] rot_mat = new double[3, 3];
@@ -316,7 +316,7 @@ namespace lab4
                 }
             }
 
-            // растяжение/сжатие
+            // растяжение/сжатие от Андрюхи
             public void dilatation(double alpha, double beta, Point p)
             {
                 double[,] dil_mat = new double[3, 3];
@@ -371,7 +371,7 @@ namespace lab4
             }
         }
         
-        // умножение строки на матрицу
+        // умножение строки на матрицу от Андрюхи
         static double[] mats_mult(List<double> prev_cords, double[,] aff_mat)
         {
             double[] res = new double[2];
@@ -415,35 +415,7 @@ namespace lab4
             return Math.Max(a, c) <= Math.Min(b, d);
         }
 
-        // проверка, пересекаются ли отрезки
-        //static bool ifintersect(Segment s1, Segment s2)
-        //{
-        //    int p1x = s1.location.cords[0].X;
-        //    int p1y = s1.location.cords[0].Y;
-        //    int p2x = s1.location.cords[1].X;
-        //    int p2y = s1.location.cords[1].Y;
-        //    int p3x = s2.location.cords[0].X;
-        //    int p3y = s2.location.cords[0].Y;
-        //    int p4x = s2.location.cords[1].X;
-        //    int p4y = s2.location.cords[1].Y;
-
-        //    int A1 = p1y - p2y;
-        //    int B1 = p2x - p1x;
-        //    int C1 = -A1 * p1x - B1 * p1y;
-        //    int A2 = p3y - p4y;
-        //    int B2 = p4x - p3x;
-        //    int C2 = -A2 * p3x - B2 * p3y;
-        //    int zn = det(A1, B1, A2, B2);
-        //    if (zn != 0)
-        //    {
-        //        double x = -det(C1, B1, C2, B2) * 1.0 / zn;
-        //        double y = -det(A1, C1, A2, C2) * 1.0 / zn;
-        //        return between(p1x, p2x, x) && between(p1y, p2y, y) && between(p3x, p4x, x) && between(p3y, p4y, y);
-        //    }
-        //    else
-        //        return det(A1, C1, A2, C2) == 0 && det(B1, C1, B2, C2) == 0 && intersect_1(p1x, p2x, p3x, p4x) && intersect_1(p1y, p2y, p3y, p4y);
-        //}
-
+        // поиск точки пересечения
         static Point segments_crosspoint(Segment s1, Segment s2)
         {
             int p1x = s1.location.cords[0].X;
@@ -476,37 +448,6 @@ namespace lab4
                 return new Point((int)x, (int)y);
             return new Point(-10, -10);
         }
-
-        // поиск точки пересечения
-        //static Point segments_crosspoint(Segment s1, Segment s2)
-        //{
-        //    Point res = new Point();
-
-        //    if (!ifintersect(s1, s2))
-        //        return res;
-
-        //    int p1x = s1.location.cords[0].X;
-        //    int p1y = s1.location.cords[0].Y;
-        //    int p2x = s1.location.cords[1].X;
-        //    int p2y = s1.location.cords[1].Y;
-        //    int p3x = s2.location.cords[0].X;
-        //    int p3y = s2.location.cords[0].Y;
-        //    int p4x = s2.location.cords[1].X;
-        //    int p4y = s2.location.cords[1].Y;
-
-        //    int A1 = p1y - p2y;
-        //    int B1 = p2x - p1x;
-        //    int C1 = p1x * p2y - p2x * p1y;
-        //    int A2 = p3y - p4y;
-        //    int B2 = p4x - p3x;
-        //    int C2 = p3x * p4y - p4x * p3y;
-
-        //    double det = A1 * B2 - A2 * B1;
-        //    res.X = -(int)((C1 * B2 - C2 * B1) / det);
-        //    res.Y = -(int)((A1 * C2 - A2 * C1) / det);
-
-        //    return res;
-        //}
 
         class ShapePoint : Shape {
             public ShapePoint() {}
@@ -669,8 +610,17 @@ namespace lab4
             int x = crossPoint.X;
             int y = crossPoint.Y;
 
-            textBox6.Text = x.ToString();
-            textBox7.Text = y.ToString();
+            if (x == -10)
+            {
+                textBox6.Text = "—";
+                textBox7.Text = "—";
+            }
+            else
+            {
+                textBox6.Text = x.ToString();
+                textBox7.Text = y.ToString();
+            }
+            
 
             g.FillEllipse(
                 new SolidBrush(Color.DarkOrchid),
@@ -733,8 +683,7 @@ namespace lab4
                                 result_seg,
                                 (Segment)shapes.GetSelectedShape()
                             );
-                            //if (crossPoint.X == -10)
-                                // сделать что-то страшное
+                            
                             handleCrossPoint(crossPoint);
                             crosspointMode = false;
                         }
