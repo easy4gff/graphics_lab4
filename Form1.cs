@@ -16,7 +16,6 @@ namespace lab4
         Graphics g;
         Bitmap   mainBitmap;
         Pen bluePen;
-        //List<Shape> shapes;
         ListShapes shapes;
         List<ShapePoint> points;
 
@@ -31,19 +30,14 @@ namespace lab4
             private PictureBox picBoxRef;
             private ListBox listBoxRef;
 
-			//public Shape selectedShape;
-            //public int selectedIndex;
-
             public ListShapes(Graphics g, PictureBox pb, ListBox lb)
             {
                 data = new List<Shape>();
-                //selectedIndex = -1;
                 commonPen = new Pen(Color.Blue);
                 selectedPen = new Pen(Color.Red);
                 this.g = g;
                 picBoxRef = pb;
                 listBoxRef = lb;
-				//selectedShape = null;
             }
 
             public void Add(Shape s)
@@ -51,12 +45,11 @@ namespace lab4
 				if (IsEmpty())
 				{
 					data.Add(s);
-					//selectedIndex = 0;
-					//selectedShape = data[selectedIndex];
 				}
 				else
 					data.Add(s);
-                listBoxRef.Items.Add(s.GetType().ToString());
+
+                listBoxRef.Items.Add(getNameFromType(s));
                 Draw();
             }
 
@@ -64,18 +57,6 @@ namespace lab4
             {
                 return data.Count == 0;
             }
-
-            /*public Shape GetNext()
-            {
-                if (IsEmpty()) return null;
-
-                //selectedIndex = (selectedIndex + 1) % data.Count;
-				//selectedShape = data[selectedIndex];
-
-				Draw();
-                //return data[selectedIndex];
-                return data[listBoxRef.SelectedIndex];
-            }*/
 
             public Shape GetSelectedShape()
             {
@@ -96,6 +77,16 @@ namespace lab4
                     else
                         data[i].draw(g, commonPen);
                 picBoxRef.Invalidate();
+            }
+
+            private string getNameFromType(Shape s)
+            {
+                if (s.GetType() == typeof(ShapePoint))
+                    return "Точка";
+                else if (s.GetType() == typeof(Segment))
+                    return "Отрезок";
+                else
+                    return "Многоугольник";
             }
         }
 
@@ -397,7 +388,6 @@ namespace lab4
             return Math.Min(a, b) <= c + EPS && c <= Math.Max(a, b) + EPS;
         }
 
-        // тоже чё-то проверяет
         static bool intersect_1(int a, int b, int c, int d)
         {
             if (a > b)
@@ -456,7 +446,9 @@ namespace lab4
 
             public override void draw(Graphics g, Pen pen)
             {
-                g.DrawEllipse(pen, location.cords.First().X, location.cords.First().Y, 1, 1);
+                SolidBrush sb = new SolidBrush(pen.Color);
+                g.FillEllipse(sb, location.cords.First().X - 2, location.cords.First().Y - 2, 4, 4);
+                sb.Dispose();
             }
         }
 
@@ -505,13 +497,6 @@ namespace lab4
                     );
             }
         }
-
-        /*public void drawShapes()
-        {
-            foreach (Shape s in shapes)
-                s.draw(g, bluePen);
-            pictureBox1.Invalidate();
-        }*/
 
         public void initComboBox() {
             comboBox1.Items.AddRange(new string[] {
@@ -644,7 +629,6 @@ namespace lab4
 			ShapeBuilder.Init(g, pictureBox1);
 
             initComboBox();
-            //shapes = new List<Shape>();
             shapes = new ListShapes(g, pictureBox1, listBox1);
 
             bluePen = new Pen(Color.Blue);
@@ -696,7 +680,6 @@ namespace lab4
             {
                 button2.Enabled = true;
             }
-            //drawShapes();
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -706,7 +689,6 @@ namespace lab4
             button1.Enabled = true;
             button2.Enabled = false;
             button2.Visible = false;
-            //drawShapes();
         }
 
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
